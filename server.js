@@ -27,7 +27,7 @@ const viewAll = (table) => {
     });
 };
 
-
+// function: adds employee role
 const addEmployeeRole = () => {
     db.query(`SELECT * FROM employee;`, (err, res) => {
         if (err) throw err;
@@ -54,7 +54,7 @@ const addEmployeeRole = () => {
             });
     });
 }
-
+// function: adds employee
 const addEmployee = () => {
     inquirer.prompt([
         {
@@ -87,7 +87,7 @@ const addEmployee = () => {
             });
     });
 };
-
+// function: adds role
 const addRole = () => {
     inquirer.prompt([
         {
@@ -116,7 +116,7 @@ const addRole = () => {
             });
     });
 };
-
+// function: adds department
 const addDepartment = () => {
     inquirer.prompt([
         {
@@ -135,14 +135,14 @@ const addDepartment = () => {
             });
     });
 };
-
+// function: leaves prompt menu
 const quit = () => {
     db.end();
     process.exit();
 };
 
 
-
+//prompt menu that user selects from
 const promptMenu = () => {
     inquirer
      .prompt({
@@ -160,6 +160,8 @@ const promptMenu = () => {
         "Quit",
     ]
 })
+
+    //chooses function based on input in prompt menu
     .then((data) => {
         if (data.option === 'View All Departments') {
             viewAll("department");
@@ -188,6 +190,7 @@ const promptMenu = () => {
     });
 };
 
+//connects to port and calls promptmenu
 db.connect((err) => {
     if (err) throw err;
     app.listen(PORT, () => {
