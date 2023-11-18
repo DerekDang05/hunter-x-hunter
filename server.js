@@ -1,29 +1,30 @@
 //preliminaries to create code
-const express = require('express')
-const inquirer = require('inquirer')
-const mysql = require('mysql2')
+const express = require('express');
+const inquirer = require('inquirer');
+const mysql = require('mysql2');
 
 //connects to mysql employeeTracker database
 const db = mysql.createConnection(
     {
-      host: 'localhost',
-      user: 'root',
-      password: 'rootroot',
-      database: 'employeeTracker_db'
+        host: 'localhost',
+        user: 'root',
+        password: 'rootroot',
+        database: 'employeeTracker_db'
     },
     console.log(`Connected to the employeeTracker_db database.`)
-  );
+);
+
 const PORT = process.env.PORT || 3001;
 const app = express();
 app.use(express.urlencoded({ extended: false }));
 app.use(express.json());
 
-// function that allows other functions to access entire database depending on input
+// function that allows other functions to access the entire database depending on input
 const viewAll = (table) => {
     db.query(`SELECT * FROM ${table}`, (err, res) => {
-    if (err) throw err;
-    console.table(res);
-    promptMenu(); 
+        if (err) throw err;
+        console.table(res);
+        promptMenu();
     });
 };
 
@@ -32,28 +33,31 @@ const addEmployeeRole = () => {
     db.query(`SELECT * FROM employee;`, (err, res) => {
         if (err) throw err;
         console.table(res);
+
+        inquirer.prompt([
+            {
+                type: 'input',
+                message: 'Enter employee id you want to change',
+                name: 'employeeID',
+            },
+            {
+                type: 'input',
+                message: 'Enter new role id',
+                name: 'newEmployeeRole'
+            }
+        ]).then((data) => {
+            db.query(`UPDATE employee SET role_id = (?) WHERE id = (?);`,
+                [data.newEmployeeRole, data.employeeID],
+                (err) => {
+                    if (err) throw err;
+                    console.log('Employee information updated.');
+                    // Move promptMenu inside this callback
+                    promptMenu();
+                });
+        });
     });
-    inquirer.prompt([
-        {
-            type: 'input',
-            message: 'Enter employee id you want to change',
-            name: 'employeeID',
-        },
-        {
-            type: 'input',
-            message: 'Enter new role id',
-            name: 'newEmployeeRole'
-        }
-    ]).then((data) => {
-        db.query(`UPDATE employees SET role_id = (?) WHERE id = (?);`,
-            [data.newEmployeeRole, data.employeeID],
-            (err) => {
-                if (err) throw err;
-                console.log('Employee information updated.');
-                promptMenu();
-            });
-    });
-}
+};
+
 // function: adds employee
 const addEmployee = () => {
     inquirer.prompt([
@@ -87,6 +91,7 @@ const addEmployee = () => {
             });
     });
 };
+
 // function: adds role
 const addRole = () => {
     inquirer.prompt([
@@ -116,6 +121,7 @@ const addRole = () => {
             });
     });
 };
+
 // function: adds department
 const addDepartment = () => {
     inquirer.prompt([
@@ -135,59 +141,59 @@ const addDepartment = () => {
             });
     });
 };
+
 // function: leaves prompt menu
 const quit = () => {
     db.end();
     process.exit();
 };
 
-
 //prompt menu that user selects from
 const promptMenu = () => {
     inquirer
-     .prompt({
-        type: "list",
-        name: "option",
-        message: "What would you like to do?",
-        choices: [
-        "View All Departments",
-        "View All Roles",
-        "View All Employees",
-        "Add Department",
-        "Add Role",
-        "Add Employee",
-        "Add Employee Role",
-        "Quit",
-    ]
-})
+        .prompt({
+            type: "list",
+            name: "option",
+            message: "What would you like to do?",
+            choices: [
+                "View All Departments",
+                "View All Roles",
+                "View All Employees",
+                "Add Department",
+                "Add Role",
+                "Add Employee",
+                "Add Employee Role",
+                "Quit",
+            ]
+        })
 
-    //chooses function based on input in prompt menu
-    .then((data) => {
-        if (data.option === 'View All Departments') {
-            viewAll("department");
-        };
-        if (data.option === 'View All Roles') {
-            viewAll("role");
-        };
-        if (data.option === 'View All Employees') {
-            viewAll("employee");
-        };
-        if (data.option === 'Add Department') {
-            addDepartment();
-        };
-        if (data.option === 'Add Role') {
-            addRole();
-        };
-        if (data.option === 'Add Employee') {
-            addEmployee();
-        };
-        if (data.option === 'Add Employee Role') {
-            addEmployeeRole();
-        }
-        if (data.option === 'Quit') {
-            quit();
-        };
-    });
+        //chooses function based on input in prompt menu
+        .then((data) => {
+            if (data.option === 'View All Departments') {
+                viewAll("department");
+            };
+            if (data.option === 'View All Roles') {
+                viewAll("role");
+            };
+            if (data.option === 'View All Employees') {
+                viewAll("employee");
+            };
+            if (data.option === 'Add Department') {
+                addDepartment();
+            };
+            if (data.option === 'Add Role') {
+                addRole();
+            };
+            if (data.option === 'Add Employee') {
+                addEmployee();
+            };
+            if (data.option === 'Add Employee Role') {
+                addEmployeeRole();
+            }
+            if (data.option === 'Quit') {
+                quit();
+            };
+        });
 };
 
 //connects to port and calls promptmenu
